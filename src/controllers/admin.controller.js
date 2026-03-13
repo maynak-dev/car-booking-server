@@ -26,6 +26,20 @@ exports.updateBookingStatus = async (req, res) => {
   }
 };
 
+// NEW: Update payment status
+exports.updatePaymentStatus = async (req, res) => {
+  try {
+    const { paymentStatus } = req.body;
+    const booking = await prisma.booking.update({
+      where: { id: req.params.id },
+      data: { paymentStatus }
+    });
+    res.json(booking);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({

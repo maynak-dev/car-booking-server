@@ -10,5 +10,6 @@ router.put('/bookings/:id/status', updateBookingStatus);
 router.get('/users', getAllUsers);
 router.put('/users/:id/block', blockUser);
 router.get('/stats', getStats);
+router.put('/bookings/:id/payment', updatePaymentStatus);
 
 module.exports = router;
