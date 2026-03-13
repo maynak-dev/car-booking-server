@@ -1,7 +1,7 @@
 // src/controllers/auth.controller.js
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const prisma = require('../prisma');   // <-- changed
+const prisma = require('../prisma');
 
 const generateTokens = (userId, role) => {
   const accessToken = jwt.sign(
