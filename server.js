@@ -37,8 +37,8 @@ app.use(cors({
 }));
 
 // Handle preflight requests explicitly (optional, as cors() already does this)
-app.options('*', cors());
-
+// app.options('*', cors());
+app.options('/*path', cors());
 // ===== Other Middleware =====
 app.use(helmet());
 app.use(express.json());
