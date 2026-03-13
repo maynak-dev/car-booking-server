@@ -17,6 +17,7 @@ const app = express();
 const allowedOrigins = [
   'https://car-booking-client-nu.vercel.app',
   'https://car-booking-admin-za6s.vercel.app',
+  'https://car-booking-admin.vercel.app',
   'https://car-booking-admin-za6s-bz4gs7qps-maynak-deys-projects.vercel.app',
   'https://car-booking-admin-za6s-git-main-maynak-deys-projects.vercel.app',
   'http://localhost:5173',
