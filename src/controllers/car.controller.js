@@ -1,15 +1,14 @@
-// src/controllers/car.controller.js
 const prisma = require('../prisma');
-const fs = require('fs');
-const path = require('path');
 
-// Helper to convert file buffer to base64
+// Helper: convert file buffer to base64 (for production)
 const fileToBase64 = (file) => {
   return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 };
 
-// Helper to save file locally (development only)
+// Helper: save file locally (development only)
 const saveFileLocally = (file) => {
+  const fs = require('fs');
+  const path = require('path');
   const uploadDir = 'uploads';
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -107,10 +106,8 @@ exports.updateCar = async (req, res) => {
       existingImages 
     } = req.body;
 
-    // Parse existing images (they are either URLs or base64 strings)
     let imageUrls = existingImages ? JSON.parse(existingImages) : [];
 
-    // Process new images
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         if (process.env.NODE_ENV === 'production') {
