@@ -16,6 +16,7 @@ const app = express();
 // ===== CORS Configuration =====
 const allowedOrigins = [
   'https://car-booking-client-nu.vercel.app',
+  'https://car-booking-client.vercel.app',
   'https://car-booking-admin-za6s.vercel.app',
   'https://car-booking-admin.vercel.app',
   'https://car-booking-admin-za6s-bz4gs7qps-maynak-deys-projects.vercel.app',
