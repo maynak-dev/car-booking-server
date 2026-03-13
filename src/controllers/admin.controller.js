@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+// src/controllers/admin.controller.js
+const prisma = require('../prisma');
 
 exports.getAllBookings = async (req, res) => {
   try {
@@ -59,8 +59,7 @@ exports.getStats = async (req, res) => {
       _sum: { totalPrice: true },
       where: { status: 'CONFIRMED' }
     });
-    
-    // Last 7 days bookings count
+
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const dailyBookings = await prisma.booking.groupBy({

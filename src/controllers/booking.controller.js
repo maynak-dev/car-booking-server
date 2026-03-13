@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+// src/controllers/booking.controller.js
+const prisma = require('../prisma');
 
 exports.checkAvailability = async (req, res) => {
   try {

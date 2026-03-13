@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+// src/controllers/car.controller.js
+const prisma = require('../prisma');
 
 exports.getCars = async (req, res) => {
   try {
