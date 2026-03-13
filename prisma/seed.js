@@ -27,7 +27,8 @@ async function main() {
   console.log('Cleared old data');
 
   // ---------- Users ----------
-  const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
+  // Admin password set to 'admin1234' as requested
+  const hashedPasswordAdmin = await bcrypt.hash('admin1234', 10);
   const hashedPasswordUser = await bcrypt.hash('password123', 10);
 
   const admin = await prisma.user.create({
