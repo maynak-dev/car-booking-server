@@ -13,47 +13,36 @@ const adminRoutes = require('./src/routes/admin.routes');
 
 const app = express();
 
-// ===== Dynamic CORS Configuration =====
+// ===== CORS Configuration =====
 const allowedOrigins = [
   'https://car-booking-client-nu.vercel.app',
+  'https://car-booking-client.vercel.app',
   'https://car-booking-admin-za6s.vercel.app',
+  'https://car-booking-admin.vercel.app',
+  'https://car-booking-admin-za6s-bz4gs7qps-maynak-deys-projects.vercel.app',
+  'https://car-booking-admin-za6s-git-main-maynak-deys-projects.vercel.app',
   'http://localhost:5173',
   'http://localhost:5174'
 ];
 
-const corsOptions = {
+app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-
-    // Check explicit list
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
-
-    // Allow any Vercel preview URL for admin
-    const adminPreviewRegex = /^https:\/\/car-booking-admin-.*-maynak-deys-projects\.vercel\.app$/;
-    if (adminPreviewRegex.test(origin)) {
-      return callback(null, true);
-    }
-
-    // Allow any Vercel preview URL for client
-    const clientPreviewRegex = /^https:\/\/car-booking-client-.*-maynak-deys-projects\.vercel\.app$/;
-    if (clientPreviewRegex.test(origin)) {
-      return callback(null, true);
-    }
-
-    // If none match, reject
-    callback(new Error('CORS policy does not allow access from this origin.'));
+    return callback(null, true);
   },
   credentials: true,
-  optionsSuccessStatus: 200
-};
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-app.use(cors(corsOptions));
-// Handle preflight requests for all routes
-app.options('*', cors(corsOptions));
-
+// Handle preflight requests explicitly (optional, as cors() already does this)
+// app.options('*', cors());
+app.options('/*path', cors());
 // ===== Other Middleware =====
 app.use(helmet());
 app.use(express.json());
