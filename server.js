@@ -13,36 +13,47 @@ const adminRoutes = require('./src/routes/admin.routes');
 
 const app = express();
 
-// ===== CORS Configuration =====
+// ===== Dynamic CORS Configuration =====
 const allowedOrigins = [
   'https://car-booking-client-nu.vercel.app',
-  'https://car-booking-client.vercel.app',
   'https://car-booking-admin-za6s.vercel.app',
-  'https://car-booking-admin.vercel.app',
-  'https://car-booking-admin-za6s-bz4gs7qps-maynak-deys-projects.vercel.app',
-  'https://car-booking-admin-za6s-git-main-maynak-deys-projects.vercel.app',
   'http://localhost:5173',
   'http://localhost:5174'
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+
+    // Check explicit list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
-    return callback(null, true);
+
+    // Allow any Vercel preview URL for admin
+    const adminPreviewRegex = /^https:\/\/car-booking-admin-.*-maynak-deys-projects\.vercel\.app$/;
+    if (adminPreviewRegex.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow any Vercel preview URL for client
+    const clientPreviewRegex = /^https:\/\/car-booking-client-.*-maynak-deys-projects\.vercel\.app$/;
+    if (clientPreviewRegex.test(origin)) {
+      return callback(null, true);
+    }
+
+    // If none match, reject
+    callback(new Error('CORS policy does not allow access from this origin.'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  optionsSuccessStatus: 200
+};
 
-// Handle preflight requests explicitly (optional, as cors() already does this)
-// app.options('*', cors());
-app.options('/*path', cors());
+app.use(cors(corsOptions));
+// Handle preflight requests for all routes
+app.options('*', cors(corsOptions));
+
 // ===== Other Middleware =====
 app.use(helmet());
 app.use(express.json());
