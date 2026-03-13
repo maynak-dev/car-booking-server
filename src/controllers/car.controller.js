@@ -1,22 +1,8 @@
 const prisma = require('../prisma');
 
-// Helper: convert file buffer to base64 (for production)
+// Helper: convert file buffer to base64 (always used)
 const fileToBase64 = (file) => {
   return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-};
-
-// Helper: save file locally (development only)
-const saveFileLocally = (file) => {
-  const fs = require('fs');
-  const path = require('path');
-  const uploadDir = 'uploads';
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-  const filename = `${Date.now()}-${file.originalname}`;
-  const filepath = path.join(uploadDir, filename);
-  fs.writeFileSync(filepath, file.buffer);
-  return `/uploads/${filename}`;
 };
 
 exports.getCars = async (req, res) => {
@@ -62,15 +48,8 @@ exports.createCar = async (req, res) => {
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        if (process.env.NODE_ENV === 'production') {
-          // In production: store as base64
-          const base64 = fileToBase64(file);
-          imageUrls.push(base64);
-        } else {
-          // In development: save locally
-          const localUrl = saveFileLocally(file);
-          imageUrls.push(localUrl);
-        }
+        const base64 = fileToBase64(file);
+        imageUrls.push(base64);
       }
     }
 
@@ -110,13 +89,8 @@ exports.updateCar = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        if (process.env.NODE_ENV === 'production') {
-          const base64 = fileToBase64(file);
-          imageUrls.push(base64);
-        } else {
-          const localUrl = saveFileLocally(file);
-          imageUrls.push(localUrl);
-        }
+        const base64 = fileToBase64(file);
+        imageUrls.push(base64);
       }
     }
 
