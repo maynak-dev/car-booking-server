@@ -1,5 +1,24 @@
 // src/controllers/car.controller.js
 const prisma = require('../prisma');
+const fs = require('fs');
+const path = require('path');
+
+// Helper to convert file buffer to base64
+const fileToBase64 = (file) => {
+  return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+};
+
+// Helper to save file locally (development only)
+const saveFileLocally = (file) => {
+  const uploadDir = 'uploads';
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  const filename = `${Date.now()}-${file.originalname}`;
+  const filepath = path.join(uploadDir, filename);
+  fs.writeFileSync(filepath, file.buffer);
+  return `/uploads/${filename}`;
+};
 
 exports.getCars = async (req, res) => {
   try {
@@ -39,14 +58,38 @@ exports.getCarById = async (req, res) => {
 
 exports.createCar = async (req, res) => {
   try {
-    const { name, brand, model, year, licensePlate, type, fuelType, transmission, seats, pricePerDay, description } = req.body;
-    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    const { name, brand, model, year, licensePlate, type, fuelType, transmission, seats, pricePerDay, description, isAvailable } = req.body;
+    
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        if (process.env.NODE_ENV === 'production') {
+          // In production: store as base64
+          const base64 = fileToBase64(file);
+          imageUrls.push(base64);
+        } else {
+          // In development: save locally
+          const localUrl = saveFileLocally(file);
+          imageUrls.push(localUrl);
+        }
+      }
+    }
+
     const car = await prisma.car.create({
       data: {
-        name, brand, model, year: parseInt(year), licensePlate,
-        type, fuelType, transmission, seats: parseInt(seats),
-        pricePerDay: parseFloat(pricePerDay), description,
-        images: JSON.stringify(images)
+        name,
+        brand,
+        model,
+        year: parseInt(year),
+        licensePlate,
+        type,
+        fuelType,
+        transmission,
+        seats: parseInt(seats),
+        pricePerDay: parseFloat(pricePerDay),
+        description,
+        images: JSON.stringify(imageUrls),
+        isAvailable: isAvailable === 'true'
       }
     });
     res.status(201).json(car);
@@ -58,17 +101,44 @@ exports.createCar = async (req, res) => {
 exports.updateCar = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, brand, model, year, licensePlate, type, fuelType, transmission, seats, pricePerDay, description } = req.body;
-    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : undefined;
+    const { 
+      name, brand, model, year, licensePlate, type, fuelType, 
+      transmission, seats, pricePerDay, description, isAvailable, 
+      existingImages 
+    } = req.body;
+
+    // Parse existing images (they are either URLs or base64 strings)
+    let imageUrls = existingImages ? JSON.parse(existingImages) : [];
+
+    // Process new images
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        if (process.env.NODE_ENV === 'production') {
+          const base64 = fileToBase64(file);
+          imageUrls.push(base64);
+        } else {
+          const localUrl = saveFileLocally(file);
+          imageUrls.push(localUrl);
+        }
+      }
+    }
+
     const car = await prisma.car.update({
       where: { id },
       data: {
-        name, brand, model, year: year ? parseInt(year) : undefined,
-        licensePlate, type, fuelType, transmission,
+        name,
+        brand,
+        model,
+        year: year ? parseInt(year) : undefined,
+        licensePlate,
+        type,
+        fuelType,
+        transmission,
         seats: seats ? parseInt(seats) : undefined,
         pricePerDay: pricePerDay ? parseFloat(pricePerDay) : undefined,
         description,
-        images: images ? JSON.stringify(images) : undefined
+        images: JSON.stringify(imageUrls),
+        isAvailable: isAvailable === 'true' ? true : isAvailable === 'false' ? false : undefined
       }
     });
     res.json(car);
